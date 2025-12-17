@@ -82,86 +82,6 @@
   box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
 }
 
-.filter-card {
-  padding: 20px 20px 14px;
-}
-
-.filter-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-
-.filter-header h3 {
-  margin: 0;
-}
-
-.filter-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.filter-actions button {
-  border: 1px solid #cbd5e1;
-  background: #0f172a;
-  color: #f8fafc;
-  border-radius: 10px;
-  padding: 10px 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 120ms ease, box-shadow 120ms ease;
-}
-
-.filter-actions .ghost {
-  background: transparent;
-  color: #0f172a;
-}
-
-.filter-actions button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.15);
-}
-
-.drug-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 10px;
-}
-
-.pill-option {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  background: #f8fafc;
-  font-weight: 600;
-  cursor: pointer;
-  transition: border-color 150ms ease, transform 150ms ease, box-shadow 150ms ease;
-}
-
-.pill-option input {
-  margin: 0;
-}
-
-.pill-option .swatch {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  border: 2px solid #fff;
-  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.08);
-}
-
-.pill-option.active {
-  border-color: #c7d2fe;
-  background: #eef2ff;
-  box-shadow: 0 10px 24px rgba(99, 102, 241, 0.12);
-  transform: translateY(-1px);
-}
-
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -279,6 +199,99 @@
 
 .table-card {
   padding: 18px;
+}
+
+.intent-card {
+  padding: 18px;
+}
+
+.intent-card .lede {
+  color: #0b1221;
+  max-width: 880px;
+}
+
+.auth-card {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.auth-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+  align-items: end;
+}
+
+.input-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.input-col label {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.input-col input {
+  padding: 12px 12px;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  font-size: 15px;
+  background: #ffffff;
+}
+
+.auth-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.primary {
+  border: 1px solid #4338ca;
+  background: #4f46e5;
+  color: #f8fafc;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 12px 30px rgba(79, 70, 229, 0.26);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 32px rgba(79, 70, 229, 0.32);
+}
+
+.ghost {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #0f172a;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.error {
+  color: #b91c1c;
+  margin: 0;
+  font-weight: 600;
+}
+
+.auth-success {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.lede.tight {
+  margin: 0;
 }
 
 .table-head {

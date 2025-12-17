@@ -1,5 +1,12 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import {
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+} from 'firebase/auth'
 import './App.css'
+import { auth } from './firebase'
 
 const monthOrder = [
   '2024-01',
@@ -176,27 +183,30 @@ function Chart({ months, dataByDrug, maxValue }) {
 
 function App() {
   const drugs = useMemo(() => Object.keys(series), [])
-  const [selectedDrugs, setSelectedDrugs] = useState(drugs)
+  const [user, setUser] = useState(null)
+  const [authLoading, setAuthLoading] = useState(true)
+  const [authError, setAuthError] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
 
   const months = monthOrder
-  const filtered = useMemo(
-    () => overdoseData.filter((entry) => selectedDrugs.includes(entry.drug)),
-    [selectedDrugs],
-  )
+  const filtered = useMemo(() => overdoseData, [])
 
   const maxValue = useMemo(() => {
-    if (!filtered.length) return 1
-    return Math.max(...filtered.map((d) => d.deaths))
-  }, [filtered])
+    return Math.max(...overdoseData.map((d) => d.deaths))
+  }, [])
 
   const dataByDrug = useMemo(
     () =>
-      selectedDrugs.map((drug) => ({
+      drugs.map((drug) => ({
         drug,
         color: palette[drug] ?? '#0ea5e9',
-        points: months.map((month) => filtered.find((d) => d.drug === drug && d.month === month) ?? { month, deaths: 0 }),
+        points: months.map((month, idx) => ({
+          month,
+          deaths: series[drug][idx] ?? 0,
+        })),
       })),
-    [selectedDrugs, filtered, months],
+    [drugs, months],
   )
 
   const totalsByMonth = useMemo(
@@ -213,8 +223,34 @@ function App() {
   const latestTotal = totalsByMonth.find((row) => row.month === latestMonth)?.total ?? 0
   const avgMonthly = months.length ? Math.round(grandTotal / months.length) : 0
 
-  const handleToggle = (drug) => {
-    setSelectedDrugs((prev) => (prev.includes(drug) ? prev.filter((d) => d !== drug) : [...prev, drug]))
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (current) => {
+      setUser(current)
+      setAuthLoading(false)
+    })
+    return () => unsubscribe()
+  }, [])
+
+  const handleRegister = async () => {
+    setAuthError('')
+    try {
+      await createUserWithEmailAndPassword(auth, email, password)
+    } catch (err) {
+      setAuthError(err.message)
+    }
+  }
+
+  const handleLogin = async () => {
+    setAuthError('')
+    try {
+      await signInWithEmailAndPassword(auth, email, password)
+    } catch (err) {
+      setAuthError(err.message)
+    }
+  }
+
+  const handleLogout = async () => {
+    await signOut(auth)
   }
 
   return (
@@ -238,39 +274,10 @@ function App() {
         </div>
         <div className="pill-strip">
           <span className="pill">Full dataset displayed</span>
-          <span className="pill muted">Segmentation by drug</span>
         </div>
       </header>
 
       <section className="controls">
-        <div className="card filter-card">
-          <div className="filter-header">
-            <h3>Segment by drug</h3>
-            <div className="filter-actions">
-              <button type="button" onClick={() => setSelectedDrugs(drugs)}>
-                Select all
-              </button>
-              <button type="button" onClick={() => setSelectedDrugs([])} className="ghost">
-                Clear
-              </button>
-            </div>
-          </div>
-          <div className="drug-grid">
-            {drugs.map((drug) => (
-              <label key={drug} className={`pill-option ${selectedDrugs.includes(drug) ? 'active' : ''}`}>
-                <input
-                  type="checkbox"
-                  checked={selectedDrugs.includes(drug)}
-                  onChange={() => handleToggle(drug)}
-                  aria-label={`Toggle ${drug}`}
-                />
-                <span className="swatch" style={{ backgroundColor: palette[drug] }} />
-                {drug}
-              </label>
-            ))}
-          </div>
-        </div>
-
         <div className="stat-grid">
           <div className="card stat">
             <p className="eyebrow">Total deaths (shown range)</p>
@@ -334,6 +341,73 @@ function App() {
             </tbody>
           </table>
         </div>
+      </section>
+
+      <section className="card intent-card">
+        <div className="table-head">
+          <div>
+            <p className="eyebrow">Statement of Intent</p>
+            <h3>Our position on the data</h3>
+          </div>
+        </div>
+        <p className="lede">
+          These overdose trends show a persistent, preventable public-health crisis. We support evidence-based harm reduction,
+          rapid access to treatment, and data transparency to hold systems accountable. Use this dashboard to advocate for policies
+          that save lives and expand care.
+        </p>
+      </section>
+
+      <section className="card auth-card">
+        <div className="table-head">
+          <div>
+            <p className="eyebrow">Register to Vote</p>
+            <h3>Support public health policy</h3>
+          </div>
+          {authLoading ? <p className="hint">Loading status…</p> : <p className="hint">Secure email sign-in</p>}
+        </div>
+
+        {user ? (
+          <div className="auth-success">
+            <p className="lede tight">Thank you for your support — you are registered to vote.</p>
+            <button className="primary" type="button" onClick={handleLogout}>
+              Log Out
+            </button>
+          </div>
+        ) : (
+          <div className="auth-form">
+            <div className="input-col">
+              <label htmlFor="email">Email</label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                placeholder="you@example.com"
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <div className="input-col">
+              <label htmlFor="password">Password</label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                placeholder="••••••••"
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+
+            {authError ? <p className="error">{authError}</p> : null}
+
+            <div className="auth-actions">
+              <button className="primary" type="button" onClick={handleRegister} disabled={authLoading}>
+                Create Account
+              </button>
+              <button type="button" onClick={handleLogin} className="ghost" disabled={authLoading}>
+                Log In
+              </button>
+            </div>
+          </div>
+        )}
       </section>
     </main>
   )
